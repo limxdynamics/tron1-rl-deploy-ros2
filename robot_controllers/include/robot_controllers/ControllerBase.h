@@ -124,6 +124,7 @@ protected:
   std::map<std::string, hardware_interface::LoanedStateInterface*> state_interfaces_map_; ///< Map of state interfaces.
   std::map<std::string, hardware_interface::LoanedCommandInterface*> command_interfaces_map_; ///< Map of command interfaces.
   std::vector<std::string> jointNames_; ///< Vector of joint names.
+  std::string rl_type_;
 };
 
 /**

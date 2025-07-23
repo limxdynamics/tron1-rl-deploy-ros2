@@ -14,9 +14,14 @@ def generate_launch_description():
     if not robot_type:
         print("Error: Please set the ROBOT_TYPE using 'export ROBOT_TYPE=<robot_type>'.")
         sys.exit(1)
+        
+    rl_type = os.getenv("RL_TYPE")
+    if not rl_type:
+        print("\033[31mError: Please set the RL_TYPE using 'export RL_TYPE=isaacgym/isaaclab'.\033[0m")
+        sys.exit(1)
 
-    robot_controllers_encoder_file = PathJoinSubstitution([FindPackageShare("robot_controllers"), "config/pointfoot/"+ robot_type +"/policy/encoder.onnx"])
-    robot_controllers_policy_file = PathJoinSubstitution([FindPackageShare("robot_controllers"), "config/pointfoot/"+ robot_type +"/policy/policy.onnx"])
+    robot_controllers_encoder_file = PathJoinSubstitution([FindPackageShare("robot_controllers"), "config/pointfoot/"+ robot_type +"/policy/" + rl_type + "/encoder.onnx"])
+    robot_controllers_policy_file = PathJoinSubstitution([FindPackageShare("robot_controllers"), "config/pointfoot/"+ robot_type +"/policy/" + rl_type + "/policy.onnx"])
     robot_controllers_pointfoot_params_file = PathJoinSubstitution([FindPackageShare("robot_controllers"), "config/pointfoot/"+ robot_type +"/params.yaml"])
     robot_controllers_file = PathJoinSubstitution([FindPackageShare("robot_controllers"), "config/robot_controllers.yaml"])
     robot_hw_joystick_file = PathJoinSubstitution([FindPackageShare("robot_hw"), "config/joystick.yaml"])
