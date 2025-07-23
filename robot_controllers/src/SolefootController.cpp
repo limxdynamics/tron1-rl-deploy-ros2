@@ -117,10 +117,11 @@ namespace robot_controllers
       jointPos(i) = this->getJointStateValue(jointNames_[i], "position");
       jointVel(i) = this->getJointStateValue(jointNames_[i], "velocity");
     }
-
+    // specify ankle_idx
+    int ankle_L_idx = rl_type_ == "isaacgym" ? 3 : 6, ankle_R_idx = 7;
     for (size_t i = 0; i < jointNames_.size(); i++)
     {
-      if ((i + 1) % 4 != 0)
+      if (i != ankle_L_idx && i != ankle_R_idx) // not ankle
       {
         double actionMin =
             jointPos(i) - initJointAngles_(i, 0) +
@@ -141,21 +142,24 @@ namespace robot_controllers
 
         lastActions_(i, 0) = actions_[i];
       }
-      else
+      else // ankle
       {
-        double actionMin = (jointVel(i) - ankleJointTorqueLimit_ / ankleJointDamping_);
-        double actionMax = (jointVel(i) + ankleJointTorqueLimit_ / ankleJointDamping_);
-        lastActions_(i, 0) = actions_[i];
-        actions_[i] = std::max(actionMin / ankleJointDamping_,
-                               std::min(actionMax / ankleJointDamping_, (double)actions_[i]));
-        double velocity_des = actions_[i] * ankleJointDamping_;
+        double actionMin = jointPos(i) - initJointAngles_(i, 0) +
+          (ankleJointDamping_ * jointVel(i) - ankleJointTorqueLimit_) / robotCfg_.controlCfg.stiffness;
+        double actionMax = jointPos(i) - initJointAngles_(i, 0) +
+          (ankleJointDamping_ * jointVel(i) + ankleJointTorqueLimit_) / robotCfg_.controlCfg.stiffness;
+        actions_[i] = std::max(actionMin / robotCfg_.controlCfg.action_scale_pos,
+                            std::min(actionMax / robotCfg_.controlCfg.action_scale_pos, (double)actions_[i]));
+        double pos_des = actions_[i] * robotCfg_.controlCfg.action_scale_pos + initJointAngles_(i, 0);
 
-        this->setJointCommandValue(jointNames_[i], "position", 0);
-        this->setJointCommandValue(jointNames_[i], "velocity", velocity_des);
-        this->setJointCommandValue(jointNames_[i], "kp", 0);
+        this->setJointCommandValue(jointNames_[i], "position", pos_des);
+        this->setJointCommandValue(jointNames_[i], "velocity", 0);
+        this->setJointCommandValue(jointNames_[i], "kp", robotCfg_.controlCfg.stiffness);
         this->setJointCommandValue(jointNames_[i], "kd", ankleJointDamping_);
         this->setJointCommandValue(jointNames_[i], "effort", 0);
         this->setJointCommandValue(jointNames_[i], "mode", 2);
+
+        lastActions_(i, 0) = actions_[i];
       }
     }
   }
