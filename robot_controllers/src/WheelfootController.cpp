@@ -121,10 +121,10 @@ namespace robot_controllers
       jointPos(i) = this->getJointStateValue(jointNames_[i], "position");
       jointVel(i) = this->getJointStateValue(jointNames_[i], "velocity");
     }
-
+    int wheel_L_idx = rl_type_ == "isaacgym" ? 3 : 6, wheel_R_idx = 7;
     for (size_t i = 0; i < jointNames_.size(); i++)
     {
-      if ((i + 1) % 4 != 0)
+      if (i != wheel_L_idx && i != wheel_R_idx) // not wheel
       {
         double actionMin =
             jointPos(i) - initJointAngles_(i, 0) +
@@ -167,11 +167,12 @@ namespace robot_controllers
   // Handle standing mode
   void WheelfootController::handleStandMode()
   {
+    int wheel_L_idx = rl_type_ == "isaacgym" ? 3 : 6, wheel_R_idx = 7;
     if (standPercent_ < 1)
     {
       for (size_t i = 0; i < jointNames_.size(); i++)
       {
-        if ((i + 1) % 4 != 0) {
+        if (i != wheel_L_idx && i != wheel_R_idx) { // not wheel
           double pos_des = defaultJointAngles_[i] * (1 - standPercent_) + initJointAngles_[i] * standPercent_;
           this->setJointCommandValue(jointNames_[i], "position", pos_des);
           this->setJointCommandValue(jointNames_[i], "velocity", 0);
@@ -350,7 +351,7 @@ namespace robot_controllers
       error += declareAndCheckParameter<double>("ControllerCfg.user_cmd_scales.lin_vel_y", robotCfg_.userCmdCfg.linVel_y);
       error += declareAndCheckParameter<double>("ControllerCfg.user_cmd_scales.ang_vel_yaw", robotCfg_.userCmdCfg.angVel_yaw);
 
-      jointPosIdxs_ = {0, 1, 2, 4, 5, 6};
+      jointPosIdxs_ = rl_type_ == "isaacgym" ? std::vector<int>({0, 1, 2, 4, 5, 6}) : std::vector<int>({0, 1, 2, 3, 4, 5});
       error += declareAndCheckParameter<double>("ControllerCfg.init_state.default_joint_angle.wheel_R_Joint", initState["wheel_R_Joint"]);
       error += declareAndCheckParameter<double>("ControllerCfg.init_state.default_joint_angle.wheel_L_Joint", initState["wheel_L_Joint"]);
       error += declareAndCheckParameter<double>("ControllerCfg.control.wheel_joint_damping", wheelJointDamping_);

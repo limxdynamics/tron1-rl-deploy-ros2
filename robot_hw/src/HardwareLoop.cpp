@@ -32,14 +32,18 @@ HardwareLoop::HardwareLoop(std::unique_ptr<robot_hw::HardwareBase> &hardware, co
     // Create ControllerManager
     controller_manager_ = std::make_shared<controller_manager::ControllerManager>(
         std::move(resource_manager), executor_, "controller_manager");
-
+    
+    // sim-gym compatibility
+    const char* rl_value = ::getenv("RL_TYPE");
+    std::string rl_type(rl_value);
+    std::string joint_names_cfg = rl_type == "isaacgym" ? "ControllerCfg.joint_names_gym" : "ControllerCfg.joint_names_lab";
     // Declare parameters ControllerCfg.joint_names
-    if (!controller_manager_->has_parameter("ControllerCfg.joint_names")) {
-      controller_manager_->declare_parameter<std::vector<std::string>>("ControllerCfg.joint_names", jointNames_);
+    if (!controller_manager_->has_parameter(joint_names_cfg)) {
+      controller_manager_->declare_parameter<std::vector<std::string>>(joint_names_cfg, jointNames_);
     }
 
     // Attempt to retrieve the 'ControllerCfg.joint_names' parameter
-    if (!controller_manager_->get_parameter("ControllerCfg.joint_names", jointNames_)) {
+    if (!controller_manager_->get_parameter(joint_names_cfg, jointNames_)) {
       RCLCPP_FATAL(rclcpp::get_logger("HardwareLoop"), "Failed to get 'ControllerCfg.joint_names' parameter");
       return;
     }

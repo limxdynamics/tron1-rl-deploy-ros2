@@ -9,15 +9,38 @@
 namespace robot_controllers {
 
 controller_interface::CallbackReturn ControllerBase::on_init() {
-  // Declare parameters
-  if (!get_node()->has_parameter("ControllerCfg.joint_names")) {
-    get_node()->declare_parameter<std::vector<std::string>>("ControllerCfg.joint_names", jointNames_);
+  // sim-gym compatibility
+  const char* rl_value = ::getenv("RL_TYPE");
+  if (rl_value && strlen(rl_value) > 0) {
+    rl_type_ = std::string(rl_value);
+  } else {
+    RCLCPP_FATAL(rclcpp::get_logger("ControllerBase"), "Error: Please set the RL_TYPE using 'export RL_TYPE=<isaacgym/isaaclab>'.");
+    abort();
   }
-
-  if (!get_node()->get_parameter("ControllerCfg.joint_names", jointNames_)) {
-    RCLCPP_FATAL(rclcpp::get_logger("ControllerBase"), "Failed to get 'ControllerCfg.joint_names' parameter");
-    
-    return controller_interface::CallbackReturn::ERROR;
+  if (rl_type_ != "isaacgym" && rl_type_ != "isaaclab") {
+    RCLCPP_FATAL(rclcpp::get_logger("ControllerBase"), "Error: RL_TYPE is not supported, please choose between 'isaacgym' and 'isaaclab'.");
+    abort();
+  }
+  RCLCPP_INFO(rclcpp::get_logger("ControllerBase"), "Set RL_TYPE to %s", rl_type_.c_str());// Declare parameters
+  std::cout << rl_type_ << std::endl;
+  // gym
+  if (rl_type_ == "isaacgym") {
+    if (!get_node()->has_parameter("ControllerCfg.joint_names_gym")) {
+      get_node()->declare_parameter<std::vector<std::string>>("ControllerCfg.joint_names_gym", jointNames_);
+    }
+    if (!get_node()->get_parameter("ControllerCfg.joint_names_gym", jointNames_)) {
+      RCLCPP_FATAL(rclcpp::get_logger("ControllerBase"), "Failed to get 'ControllerCfg.joint_names_gym' parameter");
+      return controller_interface::CallbackReturn::ERROR;
+    }
+  }
+  else {
+    if (!get_node()->has_parameter("ControllerCfg.joint_names_lab")) {
+      get_node()->declare_parameter<std::vector<std::string>>("ControllerCfg.joint_names_lab", jointNames_);
+    }
+    if (!get_node()->get_parameter("ControllerCfg.joint_names_lab", jointNames_)) {
+      RCLCPP_FATAL(rclcpp::get_logger("ControllerBase"), "Failed to get 'ControllerCfg.joint_names_lab' parameter");
+      return controller_interface::CallbackReturn::ERROR;
+    }
   }
 
   std::string jointNamesPrint = "";
