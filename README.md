@@ -1,4 +1,7 @@
-# English | [中文](README_cn.md)
+<p align="center">
+  <b>English</b> | <a href="README_cn.md">中文</a>
+</p>
+
 # Deployment of Training Results
 
 > 🧭 **Part of the TRON1 open-source ecosystem.** All TRON1 repositories and where to start: [TRON1 open-source ecosystem](https://github.com/limxdynamics/tron1-rl-isaacgym#tron1-open-source-ecosystem).
