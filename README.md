@@ -76,7 +76,7 @@ You can create an RL deployment development workspace by following these steps:
 - Download the robot model description file
     ```Bash
     cd ~/limx_ws/src
-    git clone https://github.com/limxdynamics/robot-description.git
+    git clone https://github.com/limxdynamics/tron1-robot-description.git robot-description
     ```
     
 - Download Visualization Tool

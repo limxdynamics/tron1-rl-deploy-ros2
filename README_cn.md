@@ -66,7 +66,7 @@
 - 下载机器人模型描述文件
     ```Bash
     cd ~/limx_ws/src
-    git clone https://github.com/limxdynamics/robot-description.git
+    git clone https://github.com/limxdynamics/tron1-robot-description.git robot-description
     ```
     
 - 下载运动控制开发接口：
